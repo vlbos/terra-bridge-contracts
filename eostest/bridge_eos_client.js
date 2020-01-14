@@ -2,14 +2,25 @@ const Eos = require('eosjs');
 const dotenv = require('dotenv');
 //const axios = require('axios');
 const request = require('request');
-//Helpers
-const CoinGecko = require('./lib/CoinGecko');
 let sleep = require('sleep');
 // var request = require('request'); // https://www.npmjs.com/package/request
 let async = require('async'); // https://www.npmjs.com/package/async
 
 
 dotenv.load();
+
+const ecc = require('eosjs-ecc')
+
+function test_sig()
+{
+const wif = '5J5twkfSgL3SgWNKDsD5bjvevdmbXD5faBGcybJVAmYjCJXvpbJ'
+const sig = ecc.sign('hello', wif)
+
+console.log('Public Key:', ecc.privateToPublic(wif)) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
+
+console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
+}
+
 
 const interval = process.env.FREQ;
 const owner = process.env.ORACLE;
@@ -21,7 +32,7 @@ const oracle = "oracleoracle";
 
 const eos = Eos({
 	httpEndpoint: process.env.EOS_PROTOCOL + "://" + process.env.EOS_HOST + ":" + process.env.EOS_PORT,
-	keyProvider: [process.env.EOS_KEY, '5JhNVeWb8DnMwczC54PSeGBYeQgjvW4SJhVWXMXW7o4f3xh7sYk', '5JBqSZmzhvf3wopwyAwXH5g2DuNw9xdwgnTtuWLpkWP7YLtDdhp', '5JCtWxuqPzcPUfFukj58q8TqyRJ7asGnhSYvvxi16yq3c5p6JRG', '5K79wAY8rgPwWQSRmyQa2BR8vPicieJdLCXL3cM5Db77QnsJess', "5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m", "5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE", "5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW", "5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"],
+	keyProvider: [process.env.EOS_KEY, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3','5JhNVeWb8DnMwczC54PSeGBYeQgjvW4SJhVWXMXW7o4f3xh7sYk', '5JBqSZmzhvf3wopwyAwXH5g2DuNw9xdwgnTtuWLpkWP7YLtDdhp', '5JCtWxuqPzcPUfFukj58q8TqyRJ7asGnhSYvvxi16yq3c5p6JRG', '5K79wAY8rgPwWQSRmyQa2BR8vPicieJdLCXL3cM5Db77QnsJess', "5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m", "5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE", "5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW", "5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"],
 	chainId: process.env.EOS_CHAIN,
 	verbose: false,
 	logger: {
@@ -93,51 +104,6 @@ const allowContract = (auth, key, contract, parent) => {
 // 	authorization: [oraclizeAccount]
 //   });
 
-// function sleep(ms) {
-// 	return new Promise(resolve => setTimeout(resolve, ms))
-//   }
-
-// function* sleep(ms) {
-// 	yield new Promise(function (resolve, reject) {
-// 		//console.log(new Date());
-// 		setTimeout(resolve, ms);
-// 	})
-// }
-
-
-// class Person(name){
-// 	this.name=name;
-// 	let f=function(){alert('My name is '+this.name)};
-
-
-// 	 ff(){
-// 		 //console.log("ff");
-// 	 //console.log(new Date());
-// 	 sleep.sleep(1);
-// 	 //console.log(new Date());
-// 	}
-// 	// setTimeout(f,50); //错误
-
-// 	let THIS=this;
-// 	setTimeout(function(){ff.apply(THIS)},50); //正确，通用
-// 	// setTimeout(function(){ff.call(THIS)},50); //正确，通用
-// }
-// new Person('Jack');
-
-
-
-// function sleep(ms) {
-// 	return new Promise((resolve) => setTimeout(resolve, ms));
-// }
-function test() {
-	// let temple = await sleep(1000);
-	// //console.log(new Date());
-	// return temple
-	//console.log(new Date());
-	sleep.sleep(1);
-	//console.log(new Date());
-}
-// test();
 
 
 function find_from_array(arr) {
@@ -167,51 +133,296 @@ const request_id = 0;
 // const duration = 30;
 // const update_start_time = "2019-09-16 09:09:09";
 class BridgeEosClient {
-	constructor(timer_type, service_id, update_cycle, duration, update_start_time) {
-		this.timer_type = timer_type;
-		this.service_id = service_id;
-		this.update_cycle = update_cycle;
-		this.duration = duration;
-		this.update_start_time = update_start_time;
+	constructor() {
+		
 	}
 
-	pushdatax(cycle_number, data, begin, end) {
-		let timer_type = this.timer_type;
-		let service_id = this.service_id;
-
+	setparameter() {
+		console.log("results:", "results");
 		eos.contract(oracleContract)
+		.then((contract) => {
+				contract.setparameter({
+					version: 1,
+					core_symbol: "BOS",
+					precision: 4,
+					foreign:{validatorContractAddress:"burn.bos",gasPrice:100,requiredBlockConfirmations:1,minPerTx:1,maxPerTx:100,dailyLimit:1000},
+					home:{validatorContractAddress:"burn.bos",gasPrice:100,requiredBlockConfirmations:1,minPerTx:1,maxPerTx:100,dailyLimit:1000}
+				},
+					{
+						scope: oracleContract,
+						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+					})
+					.then(results => {
+						console.log("results:", results);
+					})
+					.catch(error => {
+						console.log("error:", error);
+					});
+
+
+		})
+		.catch(error => {
+			console.log("error:", error);
+		});
+}
+
+impvalidator() {
+			eos.contract(oracleContract)
 			.then((contract) => {
 				// sleep.sleep(2);
-				for (let i = begin; i <= end; i++) {
-					let provider = "provider" + repeat(i, 4);
-					console.log("$$$$push===",i,"Date.parse(new Date()) =", (new Date()) );
-					contract.pushdata({
-						service_id: this.service_id,
-						provider: provider,
-						cycle_number: cycle_number,
-						request_id: request_id,
-						data: "" + JSON.stringify(data)
-					},
+				// var str1 = 'a';
+					// let i = 1;
+					let providers =[];
+					for(let j=1;j<=5;j++)
+					{
+						providers.push("provider" +repeat(j,4));// String.fromCharCode(str1.charCodeAt()+i)
+					}
+
+					contract.impvalidator({requiredSignatures:5,initialValidators:providers,owner:"burn.bos"},
 						{
 							scope: oracleContract,
-							authorization: [`${provider}@${process.env.ORACLE_PERMISSION || 'active'}`]
+							authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
 						})
 						.then(results => {
-							// //console.log("results:", results);
-							console.log("$$$$push result===",i,"Date.parse(new Date()) =", (new Date()) );
+							console.log("results:", results);
 						})
 						.catch(error => {
 							console.log("error:", error);
 						});
-					console.log(new Date(), "provider=", provider, "cycle_number=", cycle_number);
-					console.log("timer_type=", timer_type, "service_id=", service_id);
-					// sleep.sleep(2);
-					// console.log(new Date());
-				}
-
 			})
 			.catch(error => {
-				//console.log("error:", error);
+				console.log("error:", error);
 			});
 	}
 
+	transferNativeToHome() {
+		eos.contract(oracleContract)
+			.then((contract) => {
+				contract.transfern2h({
+					sender: "consumer1111",
+					recipient: "consumer2222",
+					value: 10000
+				},
+					{
+						scope: oracleContract,
+						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+					})
+					.then(results => {
+						console.log("results:", results);
+					})
+					.catch(error => {
+						console.log("error:", error);
+					});
+			})
+			.catch(error => {
+				console.log("error:", error);
+			});
+	}
+
+	transferTokenToHome() {
+		eos.contract(oracleContract)
+			.then((contract) => {
+				contract.transfert2h({
+					sender: "consumer1111",
+					token:"BOSS",
+					recipient: "consumer2222",
+					value: 10000
+				},
+					{
+						scope: oracleContract,
+						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+					})
+					.then(results => {
+						console.log("results:", results);
+					})
+					.catch(error => {
+						console.log("error:", error);
+					});
+			})
+			.catch(error => {
+				console.log("error:", error);
+			});
+	}
+
+	transferFromHome() {
+		eos.contract(oracleContract)
+			.then((contract) => {
+					let sigs =[];
+					for(let j=1;j<=5;j++)
+					{
+						sigs.push("provider" +repeat(j,4));// String.fromCharCode(str1.charCodeAt()+i)
+					}
+				contract.transferfrom({
+					sender: "consumer1111",
+					sig:sigs,
+					message: "consumer2222"
+				},
+					{
+						scope: oracleContract,
+						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+					})
+					.then(results => {
+						console.log("results:", results);
+					})
+					.catch(error => {
+						console.log("error:", error);
+					});
+			})
+			.catch(error => {
+				console.log("error:", error);
+			});
+	}
+////hometoken
+
+registerToken() {
+	eos.contract(oracleContract)
+		.then((contract) => {
+			contract.regtoken({
+				sender: "consumer1111",
+				foreignAddress:"ETH",
+				homeAddress: "ETHT"
+			},
+				{
+					scope: oracleContract,
+					authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+				})
+				.then(results => {
+					console.log("results:", results);
+				})
+				.catch(error => {
+					console.log("error:", error);
+				});
+		})
+		.catch(error => {
+			console.log("error:", error);
+		});
+}
+
+transferNativeToForeign() {
+	eos.contract(oracleContract)
+		.then((contract) => {
+			contract.transfern2f({
+				sender: "consumer1111",
+				recipient: "consumer2222",
+				value: 10000
+			},
+				{
+					scope: oracleContract,
+					authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+				})
+				.then(results => {
+					console.log("results:", results);
+				})
+				.catch(error => {
+					console.log("error:", error);
+				});
+		})
+		.catch(error => {
+			console.log("error:", error);
+		});
+}
+
+transferTokenToForeign() {
+	eos.contract(oracleContract)
+		.then((contract) => {
+			contract.transfert2f({
+				sender: "consumer1111",
+				token:"BOSS",
+				recipient: "consumer2222",
+				value: 10000
+			},
+				{
+					scope: oracleContract,
+					authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+				})
+				.then(results => {
+					console.log("results:", results);
+				})
+				.catch(error => {
+					console.log("error:", error);
+				});
+		})
+		.catch(error => {
+			console.log("error:", error);
+		});
+}
+
+transferFromForeign() {
+	eos.contract(oracleContract)
+		.then((contract) => {
+				let sigs =[];
+				for(let j=1;j<=5;j++)
+				{
+					sigs.push("provider" +repeat(j,4));// String.fromCharCode(str1.charCodeAt()+i)
+				}
+					
+			contract.transferfrof({
+				sender: "consumer1111",
+				foreignToken:"ETH",
+				recipient: "consumer2222",
+				value: 10000,
+				transactionHash: "consumer2222"
+			},
+				{
+					scope: oracleContract,
+					authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+				})
+				.then(results => {
+					console.log("results:", results);
+				})
+				.catch(error => {
+					console.log("error:", error);
+				});
+		})
+		.catch(error => {
+			console.log("error:", error);
+		});
+}
+
+submitSignature() {
+	eos.contract(oracleContract)
+		.then((contract) => {
+				let sigs =[];
+				for(let j=1;j<=5;j++)
+				{
+					sigs.push("provider" +repeat(j,4));// String.fromCharCode(str1.charCodeAt()+i)
+				}
+				// const price = {
+						// 	value: 200000,
+						// 	decimals: 4
+						// };
+						// const priceBinary = contract.fc.toBuffer("price", price);
+			contract.submitsig({
+				sender: "consumer1111",
+				sender_key:"",
+				sig:sigs,
+				message: "consumer2222"
+			},
+				{
+					scope: oracleContract,
+					authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+				})
+				.then(results => {
+					console.log("results:", results);
+				})
+				.catch(error => {
+					console.log("error:", error);
+				});
+		})
+		.catch(error => {
+			console.log("error:", error);
+		});
+}
+
+}
+
+// new BridgeEosClient().setparameter();
+new BridgeEosClient().impvalidator();
+new BridgeEosClient().transferNativeToHome();
+new BridgeEosClient().transferTokenToHome();
+new BridgeEosClient().transferFromHome();
+new BridgeEosClient().registerToken();
+new BridgeEosClient().transferNativeToForeign();
+new BridgeEosClient().transferTokenToForeign();
+new BridgeEosClient().transferFromForeign();
+new BridgeEosClient().submitSignature();
