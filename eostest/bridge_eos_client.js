@@ -11,15 +11,6 @@ dotenv.load();
 
 const ecc = require('eosjs-ecc')
 
-function test_sig()
-{
-const wif = '5J5twkfSgL3SgWNKDsD5bjvevdmbXD5faBGcybJVAmYjCJXvpbJ'
-const sig = ecc.sign('hello', wif)
-
-console.log('Public Key:', ecc.privateToPublic(wif)) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
-
-console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
-}
 
 
 const interval = process.env.FREQ;
@@ -27,12 +18,12 @@ const owner = process.env.ORACLE;
 const oracleContract = process.env.CONTRACT;
 
 const oraclize = "oraclebosbos";
-const consumer = "consumer1234";
+const consumer = "consumer1111";
 const oracle = "oracleoracle";
 
 const eos = Eos({
 	httpEndpoint: process.env.EOS_PROTOCOL + "://" + process.env.EOS_HOST + ":" + process.env.EOS_PORT,
-	keyProvider: [process.env.EOS_KEY, '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3','5JhNVeWb8DnMwczC54PSeGBYeQgjvW4SJhVWXMXW7o4f3xh7sYk', '5JBqSZmzhvf3wopwyAwXH5g2DuNw9xdwgnTtuWLpkWP7YLtDdhp', '5JCtWxuqPzcPUfFukj58q8TqyRJ7asGnhSYvvxi16yq3c5p6JRG', '5K79wAY8rgPwWQSRmyQa2BR8vPicieJdLCXL3cM5Db77QnsJess', "5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m", "5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE", "5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW", "5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"],
+	keyProvider: [process.env.EOS_KEY, '5J1G4dhajiWDQduM3WSJ26vuoaMHi1AoqFLgVpazHL2aHsMkSb1','5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3','5JhNVeWb8DnMwczC54PSeGBYeQgjvW4SJhVWXMXW7o4f3xh7sYk', '5JBqSZmzhvf3wopwyAwXH5g2DuNw9xdwgnTtuWLpkWP7YLtDdhp', '5JCtWxuqPzcPUfFukj58q8TqyRJ7asGnhSYvvxi16yq3c5p6JRG', '5K79wAY8rgPwWQSRmyQa2BR8vPicieJdLCXL3cM5Db77QnsJess', "5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m", "5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE", "5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW", "5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"],
 	chainId: process.env.EOS_CHAIN,
 	verbose: false,
 	logger: {
@@ -128,6 +119,41 @@ function to_timestamp(time) {
 
 const request_id = 0;
 
+
+
+function test_sig()
+{
+	// std::string token;
+	// name recipient;
+	// uint64_t amount;
+	// checksum256 txHash;
+
+				 const message = {
+							 token: "eosio.token:BOS:4",
+							 recipient: "consumer2222",
+							 amount:10000,
+							 txHash:"11"
+						 };
+						 const messageBinary = contract.fc.toBuffer("message", message);
+						//  let a = ecc.sha256(JSON.stringify("Hello)); 
+						//  ecc.sha256(Buffer.from(a, 'hex'))
+	let pvts = 	["5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m","5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE","5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW","5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"];
+	  
+const wif = '5J5twkfSgL3SgWNKDsD5bjvevdmbXD5faBGcybJVAmYjCJXvpbJ'
+let sigs =[];
+					for(let j=1;j<=5;j++)
+					{
+						sigs.push(ecc.sign(message, pvts[j]));// String.fromCharCode(str1.charCodeAt()+i)
+					}
+
+// const sig = ecc.sign(message, wif)
+
+// console.log('Public Key:', ecc.privateToPublic(wif)) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
+
+// console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
+}
+
+
 // const service_id = 1;
 // const update_cycle = 120;
 // const duration = 30;
@@ -145,8 +171,8 @@ class BridgeEosClient {
 					version: 1,
 					core_symbol: "BOS",
 					precision: 4,
-					foreign:{validatorContractAddress:"burn.bos",gasPrice:100,requiredBlockConfirmations:1,minPerTx:1,maxPerTx:100,dailyLimit:1000},
-					home:{validatorContractAddress:"burn.bos",gasPrice:100,requiredBlockConfirmations:1,minPerTx:1,maxPerTx:100,dailyLimit:1000}
+					foreign:{validatorContractAddress:"burn.bos",gasPrice:100,requiredBlockConfirmations:1,minPerTx:1,maxPerTx:100000,dailyLimit:1000000},
+					home:{validatorContractAddress:"burn.bos",gasPrice:100,requiredBlockConfirmations:1,minPerTx:1,maxPerTx:100000,dailyLimit:1000000}
 				},
 					{
 						scope: oracleContract,
@@ -172,13 +198,20 @@ impvalidator() {
 				// sleep.sleep(2);
 				// var str1 = 'a';
 					// let i = 1;
+					let pks=["EOS6U2CbfrXa9hdKauZJxxbmoXACZ4MmAWHKaQPzCk5UiBmVhZRTJ", "EOS7qsja8UCa1ExokEb5wxCwBmJWi9aW1intH1sihNNHKoAGD6J7X", "EOS7yghCVnJHEu3TEB2nnSv1mgS5Rx8ofDyQK7C4dgbUWZCP1TtD1","EOS6jmPJZAPAB7hBwYxwfKiwVuqSrkSyRy2E4mjTmQ2CyYas4ESuv" ,"EOS8hvj4KPjjGvfRfJsGEEbVvCXvAiGQ7GW345MH1r122g8Ap7xw3"];
 					let providers =[];
-					for(let j=1;j<=5;j++)
+					for(let j=0;j<5;j++)
 					{
-						providers.push("provider" +repeat(j,4));// String.fromCharCode(str1.charCodeAt()+i)
+						let n = "provider" +repeat(j+1,4);
+						let k = pks[j];
+						let o = {"first":n,"second":k};
+						providers.push(o);// String.fromCharCode(str1.charCodeAt()+i)
 					}
-
-					contract.impvalidator({requiredSignatures:5,initialValidators:providers,owner:"burn.bos"},
+				     console.log(providers);
+					contract.impvalidator({requiredSignatures:5,
+						initialValidators:providers,
+						owner:"burn.bos"
+					},
 						{
 							scope: oracleContract,
 							authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
@@ -196,7 +229,11 @@ impvalidator() {
 	}
 
 	transferNativeToHome() {
-		eos.contract(oracleContract)
+
+		 const pub = "EOS5NkC58kuahypYnbyYXEZvwau1KbD1rmRDJD2R61CzKaznnWH3y";
+ eos.transaction(allowContract(consumer, pub, oracleContract));
+
+  eos.contract(oracleContract)
 			.then((contract) => {
 				contract.transfern2h({
 					sender: "consumer1111",
@@ -205,7 +242,7 @@ impvalidator() {
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -244,22 +281,19 @@ impvalidator() {
 			});
 	}
 
+	
 	transferFromHome() {
 		eos.contract(oracleContract)
 			.then((contract) => {
-					let sigs =[];
-					for(let j=1;j<=5;j++)
-					{
-						sigs.push("provider" +repeat(j,4));// String.fromCharCode(str1.charCodeAt()+i)
-					}
+				let obj = test_sig();
 				contract.transferfrom({
-					sender: "consumer1111",
-					sig:sigs,
-					message: "consumer2222"
+					sender: consumer, 
+					sig:obj.sigs,
+					message: obj.message
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -416,13 +450,21 @@ submitSignature() {
 
 }
 
+
 // new BridgeEosClient().setparameter();
+
 new BridgeEosClient().impvalidator();
-new BridgeEosClient().transferNativeToHome();
-new BridgeEosClient().transferTokenToHome();
-new BridgeEosClient().transferFromHome();
-new BridgeEosClient().registerToken();
-new BridgeEosClient().transferNativeToForeign();
-new BridgeEosClient().transferTokenToForeign();
-new BridgeEosClient().transferFromForeign();
-new BridgeEosClient().submitSignature();
+
+// new BridgeEosClient().transferNativeToHome();
+
+// new BridgeEosClient().transferTokenToHome();
+
+// new BridgeEosClient().transferFromHome();
+
+// new BridgeEosClient().registerToken();
+
+// new BridgeEosClient().transferNativeToForeign();
+
+// new BridgeEosClient().transferTokenToForeign();
+// new BridgeEosClient().transferFromForeign();
+// new BridgeEosClient().submitSignature();
