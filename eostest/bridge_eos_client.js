@@ -121,8 +121,44 @@ const request_id = 0;
 
 
 
-function test_sig()
+function transferfromhome_sig(contract)
 {
+
+	// std::string token;
+	// name recipient;
+	// uint64_t amount;
+	// checksum256 txHash;
+	const v = 1000;
+	const vv="ss";
+				 const message = {
+							 token: v,
+							 rec: v,
+							 amount:v,
+							 txhash:vv
+						 };
+						 const messageBinary = contract.fc.toBuffer("msgdatas", message);
+						//  let a = ecc.sha256(JSON.stringify("Hello)); 
+						//  ecc.sha256(Buffer.from(a, 'hex'))
+	let pvts = 	["5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m","5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE","5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW","5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"];
+	  
+const wif = '5J5twkfSgL3SgWNKDsD5bjvevdmbXD5faBGcybJVAmYjCJXvpbJ'
+let sigs =[];
+					for(let j=0;j<5;j++)
+					{
+						sigs.push(ecc.sign(messageBinary, pvts[j]));// String.fromCharCode(str1.charCodeAt()+i)
+					}
+					return {sigs:sigs,message:messageBinary};
+// const sig = ecc.sign(message, wif)
+
+// console.log('Public Key:', ecc.privateToPublic(wif)) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
+
+// console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
+}
+
+
+function test_sig(contract)
+{
+
 	// std::string token;
 	// name recipient;
 	// uint64_t amount;
@@ -132,26 +168,29 @@ function test_sig()
 							 token: "eosio.token:BOS:4",
 							 recipient: "consumer2222",
 							 amount:10000,
-							 txHash:"11"
+							 txHash:ecc.sha256("11")
 						 };
-						 const messageBinary = contract.fc.toBuffer("message", message);
+						 const messageBinary = contract.fc.toBuffer("message_data", message);
 						//  let a = ecc.sha256(JSON.stringify("Hello)); 
 						//  ecc.sha256(Buffer.from(a, 'hex'))
 	let pvts = 	["5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m","5JN8chYis1d8EYsCdDEKXyjLT3QmpW7HYoVB13dFKenK2uwyR65", "5Kju7hDTh3uCZqpzb5VWAdCp7cA1fAiEd94zdNhU59WNaQMQQmE","5K6ZCUpk2jn1munFdiADgKgfAqcpGMHKCoJUue65p99xKX9WWCW","5KAyefwicvJyxDaQ1riCztiSgVKiH37VV9JdSRcrqi88qQkV2gJ"];
 	  
-const wif = '5J5twkfSgL3SgWNKDsD5bjvevdmbXD5faBGcybJVAmYjCJXvpbJ'
-let sigs =[];
-					for(let j=1;j<=5;j++)
-					{
-						sigs.push(ecc.sign(message, pvts[j]));// String.fromCharCode(str1.charCodeAt()+i)
-					}
+const wif = '5K2L2my3qUKqj67KU61cSACoxgREkqGFi5nKaLGjbAbbRBYRq1m'
+// let sigs =[];
+// 					for(let j=0;j<5;j++)
+// 					{
+// 						sigs.push(ecc.sign(messageBinary, pvts[j]));// String.fromCharCode(str1.charCodeAt()+i)
+// 					}
+// 					return {sigs:sigs,message:messageBinary};
+const sig = ecc.sign(messageBinary, wif)
+const pk =ecc.privateToPublic(wif);
+console.log('Public Key:',pk ) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
 
-// const sig = ecc.sign(message, wif)
+console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
 
-// console.log('Public Key:', ecc.privateToPublic(wif)) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
-
-// console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
+return {pk:pk,sig:sig,message:messageBinary};
 }
+
 
 
 // const service_id = 1;
@@ -162,6 +201,41 @@ class BridgeEosClient {
 	constructor() {
 		
 	}
+
+	test() {
+		eos.contract(oracleContract)
+			.then((contract) => {
+				let obj = test_sig(contract);
+				console.log(obj);
+				console.log(obj.sig);
+				console.log({
+					sender: consumer,
+					sender_key:obj.pk, 
+					sig:obj.sig,
+					message: obj.message
+				})
+				contract.test({
+					sender: consumer,
+					sender_key:obj.pk, 
+					sig:obj.sig,
+					message: obj.message
+				},
+					{
+						scope: oracleContract,
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
+					})
+					.then(results => {
+						console.log("results:", results);
+					})
+					.catch(error => {
+						console.log("error:", error);
+					});
+			})
+			.catch(error => {
+				console.log("error:", error);
+			});
+	}
+
 
 	setparameter() {
 		console.log("results:", "results");
@@ -200,9 +274,9 @@ impvalidator() {
 					// let i = 1;
 					let pks=["EOS6U2CbfrXa9hdKauZJxxbmoXACZ4MmAWHKaQPzCk5UiBmVhZRTJ", "EOS7qsja8UCa1ExokEb5wxCwBmJWi9aW1intH1sihNNHKoAGD6J7X", "EOS7yghCVnJHEu3TEB2nnSv1mgS5Rx8ofDyQK7C4dgbUWZCP1TtD1","EOS6jmPJZAPAB7hBwYxwfKiwVuqSrkSyRy2E4mjTmQ2CyYas4ESuv" ,"EOS8hvj4KPjjGvfRfJsGEEbVvCXvAiGQ7GW345MH1r122g8Ap7xw3"];
 					let providers =[];
-					for(let j=0;j<5;j++)
+					for(let j=0;j<pks.length;j++)
 					{
-						let n = "provider" +repeat(j+1,4);
+						let n = "provider" +repeat(j+1,4);0
 						let k = pks[j];
 						let o = {"first":n,"second":k};
 						providers.push(o);// String.fromCharCode(str1.charCodeAt()+i)
@@ -261,7 +335,7 @@ impvalidator() {
 			.then((contract) => {
 				contract.transfert2h({
 					sender: "consumer1111",
-					token:"BOSS",
+					token:"eosio.token:BOSS:4",
 					recipient: "consumer2222",
 					value: 10000
 				},
@@ -285,7 +359,7 @@ impvalidator() {
 	transferFromHome() {
 		eos.contract(oracleContract)
 			.then((contract) => {
-				let obj = test_sig();
+				let obj = transferfromhome_sig(contract);
 				contract.transferfrom({
 					sender: consumer, 
 					sig:obj.sigs,
@@ -314,7 +388,7 @@ registerToken() {
 			contract.regtoken({
 				sender: "consumer1111",
 				foreignAddress:"ETH",
-				homeAddress: "ETHT"
+				homeAddress: "eosio.token:ETHT:4"
 			},
 				{
 					scope: oracleContract,
@@ -451,15 +525,18 @@ submitSignature() {
 }
 
 
+// new BridgeEosClient().test();
+
 // new BridgeEosClient().setparameter();
 
-new BridgeEosClient().impvalidator();
+
+// new BridgeEosClient().impvalidator();
 
 // new BridgeEosClient().transferNativeToHome();
 
 // new BridgeEosClient().transferTokenToHome();
 
-// new BridgeEosClient().transferFromHome();
+new BridgeEosClient().transferFromHome();
 
 // new BridgeEosClient().registerToken();
 
