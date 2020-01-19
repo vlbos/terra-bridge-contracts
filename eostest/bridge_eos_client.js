@@ -19,7 +19,10 @@ const oracleContract = process.env.CONTRACT;
 
 const oraclize = "oraclebosbos";
 const consumer = "consumer1111";
+const provider = "provider1111";
+const provider5 = "provider5555";
 const oracle = "oracleoracle";
+const txhashtest = "012";
 
 const eos = Eos({
 	httpEndpoint: process.env.EOS_PROTOCOL + "://" + process.env.EOS_HOST + ":" + process.env.EOS_PORT,
@@ -121,7 +124,7 @@ const request_id = 0;
 
 
 
-function transferfromhome_sig(contract) {
+function transferfrom_sig(contract) {
 
 	// std::string token;
 	// name recipient;
@@ -132,7 +135,7 @@ function transferfromhome_sig(contract) {
 		token: "eosio.token:BOS:4",
 		recipient: "consumer2222",
 		amount: 10000,
-		txhash: ecc.sha256("11")
+		txhash: ecc.sha256(txhashtest)
 	};
 	const messageBinary = contract.fc.toBuffer("message_data", message);
 	//  let a = ecc.sha256(JSON.stringify("Hello)); 
@@ -144,7 +147,9 @@ function transferfromhome_sig(contract) {
 	for (let j = 0; j < 5; j++) {
 		sigs.push(ecc.sign(messageBinary, pvts[j]));// String.fromCharCode(str1.charCodeAt()+i)
 	}
-	return { sigs: sigs, message: messageBinary };
+	let pks = ["EOS6U2CbfrXa9hdKauZJxxbmoXACZ4MmAWHKaQPzCk5UiBmVhZRTJ", "EOS7qsja8UCa1ExokEb5wxCwBmJWi9aW1intH1sihNNHKoAGD6J7X", "EOS7yghCVnJHEu3TEB2nnSv1mgS5Rx8ofDyQK7C4dgbUWZCP1TtD1", "EOS6jmPJZAPAB7hBwYxwfKiwVuqSrkSyRy2E4mjTmQ2CyYas4ESuv", "EOS8hvj4KPjjGvfRfJsGEEbVvCXvAiGQ7GW345MH1r122g8Ap7xw3"];
+
+	return { sigs: sigs, message: messageBinary ,pks:pks};
 	// const sig = ecc.sign(message, wif)
 
 	// console.log('Public Key:', ecc.privateToPublic(wif)) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
@@ -181,9 +186,9 @@ function test_sig(contract) {
 	// 					return {sigs:sigs,message:messageBinary};
 	const sig = ecc.sign(messageBinary, wif)
 	const pk = ecc.privateToPublic(wif);
-	console.log('Public Key:', pk) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
+	// console.log('Public Key:', pk) // EOS68vRVaNgCvStaUmxQsKoHANU1Uypo4BQLWSNEM8KBiCAWW8deh
 
-	console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
+	// console.log('Signature:', sig) // SIG_K1_KcB1jGNsjYEE7Gby6X7KZ9z6BFVfHPey6DUayYtDagXsbzr4Tbfpq5TS2JvYzs3oMg9QGAugTyGXoTVe7DujeXpDX5KYfJ
 
 	return { pk: pk, sig: sig, message: messageBinary };
 }
@@ -356,7 +361,7 @@ class BridgeEosClient {
 	transferFromHome() {
 		eos.contract(oracleContract)
 			.then((contract) => {
-				let obj = transferfromhome_sig(contract);
+				let obj = transferfrom_sig(contract);
 				contract.transferfrom({
 					sender: consumer,
 					sig: obj.sigs,
@@ -379,17 +384,13 @@ class BridgeEosClient {
 	}
 	////hometoken
 
-	registerToken() {
+	registerToken(actiondata) {
 		eos.contract(oracleContract)
 			.then((contract) => {
-				contract.regtoken({
-					sender: "consumer1111",
-					foreignAddress: "ETH",
-					homeAddress: "eosio.token:ETHT:4"
-				},
+				contract.regtoken(actiondata,
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -407,13 +408,13 @@ class BridgeEosClient {
 		eos.contract(oracleContract)
 			.then((contract) => {
 				contract.transfern2f({
-					sender: "consumer1111",
+					sender: consumer,
 					recipient: "consumer2222",
 					value: 10000
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -431,8 +432,8 @@ class BridgeEosClient {
 		eos.contract(oracleContract)
 			.then((contract) => {
 				contract.transfert2f({
-					sender: "consumer1111",
-					token: "BOSS",
+					sender: consumer,
+					token: "ETHT",
 					recipient: "consumer2222",
 					value: 10000
 				},
@@ -455,21 +456,19 @@ class BridgeEosClient {
 	transferFromForeign() {
 		eos.contract(oracleContract)
 			.then((contract) => {
-				let sigs = [];
-				for (let j = 1; j <= 5; j++) {
-					sigs.push("provider" + repeat(j, 4));// String.fromCharCode(str1.charCodeAt()+i)
-				}
-
+				for (let j = 0; j <5; j++) {
+					let provider = ("provider" + repeat(j+1, 4));// String.fromCharCode(str1.charCodeAt()+i)
+				
 				contract.transferfrof({
-					sender: "consumer1111",
-					foreignToken: "ETH",
+					sender: provider,
+					foreignToken: "BOST",
 					recipient: "consumer2222",
 					value: 10000,
-					transactionHash: "consumer2222"
+					transactionHash: ecc.sha256(txhashtest)
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${provider}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -477,6 +476,8 @@ class BridgeEosClient {
 					.catch(error => {
 						console.log("error:", error);
 					});
+					sleep.sleep(1);
+				}
 			})
 			.catch(error => {
 				console.log("error:", error);
@@ -486,24 +487,19 @@ class BridgeEosClient {
 	submitSignature() {
 		eos.contract(oracleContract)
 			.then((contract) => {
-				let sigs = [];
-				for (let j = 1; j <= 5; j++) {
-					sigs.push("provider" + repeat(j, 4));// String.fromCharCode(str1.charCodeAt()+i)
-				}
-				// const price = {
-				// 	value: 200000,
-				// 	decimals: 4
-				// };
-				// const priceBinary = contract.fc.toBuffer("price", price);
+				for (let j = 0; j <5; j++) {
+					let provider = ("provider" + repeat(j+1, 4));// String.fromCharCode(str1.charCodeAt()+i)
+				
+				let obj = transferfrom_sig(contract);
 				contract.submitsig({
-					sender: "consumer1111",
-					sender_key: "",
-					sig: sigs,
-					message: "consumer2222"
+					sender: provider,
+					sender_key: obj.pks[j],
+					sig: obj.sigs[j],
+					message: obj.message
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${provider}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -511,32 +507,72 @@ class BridgeEosClient {
 					.catch(error => {
 						console.log("error:", error);
 					});
+					sleep.sleep(1);
+				}
 			})
 			.catch(error => {
 				console.log("error:", error);
 			});
+
+		
 	}
 
 }
 
 
-// new BridgeEosClient().test();
+var arguments = process.argv.splice(2);
+console.log('所传递的参数是：', arguments);
 
-// new BridgeEosClient().setparameter();
+//////////////////////////
+// print process.argv
+process.argv.forEach(function (val, index, array) {
+	console.log(index + ': ' + val);
+});
 
+switch (arguments[0]) {
+	case "t":
+		new BridgeEosClient().test();
+		break;
+	case "p":
+		new BridgeEosClient().setparameter();
+		break;
+	case "i":
+		new BridgeEosClient().impvalidator();
+		break;
+	case "n":
+		new BridgeEosClient().transferNativeToHome();
+		break;
+	case "h":
+		new BridgeEosClient().transferTokenToHome();
+		break;
+	case "f":
+		new BridgeEosClient().transferFromHome();
+		break;
+	case "r":
+		new BridgeEosClient().registerToken({
+			sender: consumer,
+			foreignAddress: "ETH",
+			homeAddress: "burn.bos:ETHT:4"
+		});
+		new BridgeEosClient().registerToken({
+			sender: consumer,
+			foreignAddress: "BOST",
+			homeAddress: "eosio.token:BOS:4"
+		});
+		break;
+	case "nf":
+		new BridgeEosClient().transferNativeToForeign();
+		break;
+	case "hf":
+		new BridgeEosClient().transferTokenToForeign();
+		break;
+	case "ff":
+		new BridgeEosClient().transferFromForeign();
+		break;
+	case "s":
+		new BridgeEosClient().submitSignature();
+		break;
+	default:
+		console.log("wrong option");
+}
 
-// new BridgeEosClient().impvalidator();
-
-// new BridgeEosClient().transferNativeToHome();
-
-// new BridgeEosClient().transferTokenToHome();
-
-new BridgeEosClient().transferFromHome();
-
-// new BridgeEosClient().registerToken();
-
-// new BridgeEosClient().transferNativeToForeign();
-
-// new BridgeEosClient().transferTokenToForeign();
-// new BridgeEosClient().transferFromForeign();
-// new BridgeEosClient().submitSignature();
