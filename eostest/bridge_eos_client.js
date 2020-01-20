@@ -268,6 +268,29 @@ class BridgeEosClient {
 			});
 	}
 
+	setTokenParameter(tokenpara) {
+		console.log("results:", "results");
+		eos.contract(oracleContract)
+			.then((contract) => {
+				contract.settokenpara(tokenpara,
+					{
+						scope: oracleContract,
+						authorization: [`${provider}@${process.env.ORACLE_PERMISSION || 'active'}`]
+					})
+					.then(results => {
+						console.log("results:", results);
+					})
+					.catch(error => {
+						console.log("error:", error);
+					});
+
+
+			})
+			.catch(error => {
+				console.log("error:", error);
+			});
+	}
+
 	impvalidator() {
 		eos.contract(oracleContract)
 			.then((contract) => {
@@ -333,17 +356,19 @@ class BridgeEosClient {
 	}
 
 	transferTokenToHome() {
+		const pub = "EOS5NkC58kuahypYnbyYXEZvwau1KbD1rmRDJD2R61CzKaznnWH3y";
+		eos.transaction(allowContract(consumer, pub, oracleContract));
 		eos.contract(oracleContract)
 			.then((contract) => {
 				contract.transfert2h({
-					sender: "consumer1111",
-					token: "eosio.token:BOSS:4",
+					sender: consumer,
+					token: "eosio.token:ETHT:4",
 					recipient: "consumer2222",
 					value: 10000
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -390,7 +415,7 @@ class BridgeEosClient {
 				contract.regtoken(actiondata,
 					{
 						scope: oracleContract,
-						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${provider}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -429,17 +454,20 @@ class BridgeEosClient {
 	}
 
 	transferTokenToForeign() {
+		const pub = "EOS5NkC58kuahypYnbyYXEZvwau1KbD1rmRDJD2R61CzKaznnWH3y";
+		eos.transaction(allowContract(consumer, pub, oracleContract));
+		
 		eos.contract(oracleContract)
 			.then((contract) => {
 				contract.transfert2f({
 					sender: consumer,
-					token: "ETHT",
+					token: "eosio.token:ETHT:4",
 					recipient: "consumer2222",
 					value: 10000
 				},
 					{
 						scope: oracleContract,
-						authorization: [`${oracleContract}@${process.env.ORACLE_PERMISSION || 'active'}`]
+						authorization: [`${consumer}@${process.env.ORACLE_PERMISSION || 'active'}`]
 					})
 					.then(results => {
 						console.log("results:", results);
@@ -534,7 +562,25 @@ switch (arguments[0]) {
 		new BridgeEosClient().test();
 		break;
 	case "p":
-		new BridgeEosClient().setparameter();
+			new BridgeEosClient().setparameter();
+			break;
+	case "tp":
+		new BridgeEosClient().setTokenParameter({
+			sender: provider,
+			ishome:0,
+			token: "eosio.token:ETHT:4",
+			minPerTx: 1, 
+			maxPerTx: 100000, 
+			dailyLimit: 1000000 
+			});
+		new BridgeEosClient().setTokenParameter({
+				sender: provider,
+				ishome:1,
+				token: "eosio.token:ETHT:4",
+				minPerTx: 1, 
+				maxPerTx: 100000, 
+				dailyLimit: 1000000 
+				});
 		break;
 	case "i":
 		new BridgeEosClient().impvalidator();
@@ -550,12 +596,12 @@ switch (arguments[0]) {
 		break;
 	case "r":
 		new BridgeEosClient().registerToken({
-			sender: consumer,
+			sender: provider,
 			foreignAddress: "ETH",
-			homeAddress: "burn.bos:ETHT:4"
+			homeAddress: "eosio.token:ETHT:4"
 		});
 		new BridgeEosClient().registerToken({
-			sender: consumer,
+			sender: provider,
 			foreignAddress: "BOST",
 			homeAddress: "eosio.token:BOS:4"
 		});
@@ -563,7 +609,7 @@ switch (arguments[0]) {
 	case "nf":
 		new BridgeEosClient().transferNativeToForeign();
 		break;
-	case "hf":
+	case "tf":
 		new BridgeEosClient().transferTokenToForeign();
 		break;
 	case "ff":
