@@ -6,11 +6,34 @@ let sleep = require('sleep');
 // var request = require('request'); // https://www.npmjs.com/package/request
 let async = require('async'); // https://www.npmjs.com/package/async
 
-
 dotenv.load();
 
 const ecc = require('eosjs-ecc')
 
+const EosApi = require('eosjs-api')
+
+// everything is optional
+options = {
+  httpEndpoint: 'http://127.0.0.1:8888',
+  verbose: false, // API logging
+  logger: { // Default logging functions
+    //log: config.verbose ? console.log : '',
+    error: console.error
+  },
+  fetchConfiguration: {}
+}
+
+const eosapi = EosApi(options)
+let ret = eosapi.get_info();//history_get_actions('burn.bos');
+console.log(ret);
+
+function bridge_rpc(){
+	// (async ()=>{
+	// 	// api.getInfo(); // no args triggers usage
+	// 	let ret = eosapi.get_info();//history_get_actions('burn.bos');
+	// 	console.log(ret);
+	//   })()
+}
 
 
 const interval = process.env.FREQ;
@@ -34,6 +57,8 @@ const eos = Eos({
 		error: null
 	}
 });
+
+
 
 
 const require_permissions = ({ account, key, actor, parent }) => {
@@ -335,7 +360,7 @@ class BridgeEosClient {
 		eos.contract(oracleContract)
 			.then((contract) => {
 				contract.transfern2h({
-					sender: "consumer1111",
+					sender: consumer,
 					recipient: "consumer2222",
 					value: 10000
 				},
@@ -619,6 +644,7 @@ switch (arguments[0]) {
 		new BridgeEosClient().submitSignature();
 		break;
 	default:
+		bridge_rpc();
 		console.log("wrong option");
 }
 
