@@ -10,30 +10,6 @@ dotenv.load();
 
 const ecc = require('eosjs-ecc')
 
-const EosApi = require('eosjs-api')
-
-// everything is optional
-options = {
-  httpEndpoint: 'http://127.0.0.1:8888',
-  verbose: false, // API logging
-  logger: { // Default logging functions
-    //log: config.verbose ? console.log : '',
-    error: console.error
-  },
-  fetchConfiguration: {}
-}
-
-const eosapi = EosApi(options)
-let ret = eosapi.get_info();//history_get_actions('burn.bos');
-console.log(ret);
-
-function bridge_rpc(){
-	// (async ()=>{
-	// 	// api.getInfo(); // no args triggers usage
-	// 	let ret = eosapi.get_info();//history_get_actions('burn.bos');
-	// 	console.log(ret);
-	//   })()
-}
 
 
 const interval = process.env.FREQ;
@@ -583,9 +559,6 @@ process.argv.forEach(function (val, index, array) {
 });
 
 switch (arguments[0]) {
-	case "t":
-		new BridgeEosClient().test();
-		break;
 	case "p":
 			new BridgeEosClient().setparameter();
 			break;
@@ -644,7 +617,7 @@ switch (arguments[0]) {
 		new BridgeEosClient().submitSignature();
 		break;
 	default:
-		bridge_rpc();
-		console.log("wrong option");
+		new BridgeEosClient().test();
+		console.log("test option");
 }
 
