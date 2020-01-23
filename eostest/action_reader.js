@@ -78,7 +78,20 @@ class BridgeActionReader {
                 return ibactions.indexOf(e) === -1
               })
 
+            //   array.filter(item => {
+            //     return (filters.name.length === 0 ? true : filters.name.indexOf(item.name) !== -1) &&
+            //       (filters.tag.length === 0 ? true : filters.tag.indexOf(item.tag) !== -1)
+            //   })
 
+            function compare(p){ //这是比较函数
+                return function(m,n){
+                    var a = m[p];
+                    var b = n[p];
+                    return a - b; //升序
+                }
+            }
+            arr.sort(compare("age"));
+            
             // console.log("==result==", JSON.stringify(result));
         });
 
