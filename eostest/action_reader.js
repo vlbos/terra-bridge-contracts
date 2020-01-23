@@ -1,7 +1,15 @@
-const schedule = require("node-schedule");
-var fs = require('fs');
-var queuefun = require('queue-fun');  //引入
+const dotenv = require('dotenv');
+//const axios = require('axios');
+// const request = require('request');
+// let sleep = require('sleep');
+// // var request = require('request'); // https://www.npmjs.com/package/request
+// let async = require('async'); // https://www.npmjs.com/package/async
 
+dotenv.load();
+const schedule = require("node-schedule");
+const fs = require('fs');
+const queuefun = require('queue-fun');  //引入
+4
 const EosApi = require('eosjs-api');
 
 eosapi = EosApi({
@@ -15,98 +23,161 @@ eosapi = EosApi({
     }
 });
 
-class BridgeEosClient {
-	constructor() {
+class BridgeActionReader {
+    constructor() {
 
     }
-    
- read_action(lasttx) {
-    // eosapi.getBlock(1, (error, result) => {console.log(error, result)});
-    // let ret = eosapi.getInfo((error, result) => { console.log(error, result) });//history_get_actions('burn.bos');
-    // console.log(eosapi);
-    let ret = eosapi.getActions("burn.bos", (error, result) => { 
-        console.log("====", error, result) ;
-        console.log("==result==", JSON.stringify(result));
-    });
 
-}
-}
+    global_action_seq = 0;
+    ibactions = [];
+    rbactions = [];
+    read_action() {
+        // eosapi.getBlock(1, (error, result) => {console.log(error, result)});
+        // let ret = eosapi.getInfo((error, result) => { console.log(error, result) });//history_get_actions('burn.bos');
+        // console.log(eosapi);
+        let ret = eosapi.getActions("burn.bos", -1, -10, (error, result) => {
+            console.log("====", error, result);
 
-function testfs()
-{
+            lib = 0;
+            for (let a: result.actions) {
+                if (a.global_action_seq <= global_action_seq) {
+                    return true;
+                }
 
-fs.readFile("./data/hello.txt", function (error, data) {
-    if (error) {
-        console.log('读取文件失败')
-    } else {
-        console.log(data.toString())
+                let act = {
+                    global_action_seq: a.global_action_seq, block_num: a.block_num, block_time: a.block_time,
+                    trx_id: a.action_trace.trx_id, act_name: a.action_trace.act.name, data: a.action_trace.act.data, act_digest: a.action_trace.receipt.act_digest
+                };
+
+                if (a.block_num <= result.last_irreversible_block) {
+                    ibactions.push(act);
+                }
+                else {
+                    rbactions.push(act);
+                }
+
+                if (result.last_irreversible_block>lib) {
+                       lib = result.last_irreversible_block;
+                }
+
+                console.log("==result==", JSON.stringify(result));
+            }
+
+
+
+            for (let a: rbactions) {
+             
+                if (a.block_num <= lib) {
+                    ibactions.push(act);
+                }
+               
+                console.log("==result==", JSON.stringify(result));
+            }
+
+            rbactions = rbactions.filter((e)=>{
+                return ibactions.indexOf(e) === -1
+              })
+
+
+            // console.log("==result==", JSON.stringify(result));
+        });
+
+        return false;
     }
-});
 
-fs.writeFile('./data/写入的文件.md', '我是被nodejs写入的文件', function (error) {
-    if (error) {
-        console.log('写入成功')
-    } else {
-        console.log('写入成功')
+
+    reader_timer() {
+        const timer_sticker = process.env.TIMER_TICKER || '* * * * * *';
+
+        schedule.scheduleJob(timer_sticker, async () => {
+
+            oBridgeActionReader.read_action();
+
+
+
+        });
+
     }
-});
+
+
+
+    testfs() {
+
+        fs.readFile("./data/hello.txt", function (error, data) {
+            if (error) {
+                console.log('读取文件失败')
+            } else {
+                console.log(data.toString())
+            }
+        });
+
+        fs.writeFile('./data/写入的文件.md', '我是被nodejs写入的文件', function (error) {
+            if (error) {
+                console.log('写入成功')
+            } else {
+                console.log('写入成功')
+            }
+        });
+    }
+
+    finalityQueue;
+    unfinalityQueue;
+
+    testqueue() {
+
+        //初始化Promise异步队列类
+        let Queue = queuefun.Queue();
+        //实列化最大并发为2的运行队列
+        let finalityQueue = new Queue(2, {
+            "event_succ": function (data) { console.log('queue-succ:', data) }  //成功
+            , "event_err": function (err) { console.log('queue-err:', data) }  //失败
+        });
+
+        let unfinalityQueue = new Queue(2, {
+            "event_succ": function (data) { console.log('queue-succ:', data) }  //成功
+            , "event_err": function (err) { console.log('queue-err:', data) }  //失败
+        });
+
+
+        // var q = queuefun.Q;  //模块中简单实现了Q的基本功能，可以一试，
+        // //定义一个Promise风格的异步方法
+        // function testfun(i) {
+        //     var deferred = q.defer();
+        //     // setTimeout(function () {
+        //     //     if (i && i % 3 == 0) {
+        //     //         deferred.reject(new Error("err " + i))
+        //     //     } else {
+        //             deferred.resolve(i)
+        //     //     }
+        //     // }, (Math.random() * 2000) >> 0)
+
+        //     return deferred.promise;
+        // }
+
+
+        // //向队列添加运行单元
+        // queue1.push(testfun, [1]) //添加运行项
+        // queue1.go(testfun, [2]) //添加并自动启动队列
+        // queue1.go(testfun, [3], { Queue_event: 0 }) //添加不会触发队列 回调的运行项.
+        // queue1.go(testfun, [4]).then(
+        //     function (data) { console.log('done-succ:', data) },
+        //     function (err) { console.log('done-err:', err) }
+        // )
+
+        // queue1.go(testfun, [5], {
+        //     event_succ: function (data) { console.log('conf-succ:', data) },
+        //     event_err: function (err) { console.log('conf-err:', err) }
+        // })
+
+    }
+
 }
 
-function testqueue(){
-
-//初始化Promise异步队列类
-var Queue = queuefun.Queue();
-//实列化最大并发为2的运行队列
-var queue1 = new Queue(2, {
-    "event_succ": function (data) { console.log('queue-succ:', data) }  //成功
-    , "event_err": function (err) { console.log('queue-err:', data) }  //失败
-});
-var q = queuefun.Q;  //模块中简单实现了Q的基本功能，可以一试，
-//定义一个Promise风格的异步方法
-function testfun(i) {
-    var deferred = q.defer();
-    // setTimeout(function () {
-    //     if (i && i % 3 == 0) {
-    //         deferred.reject(new Error("err " + i))
-    //     } else {
-            deferred.resolve(i)
-    //     }
-    // }, (Math.random() * 2000) >> 0)
-
-    return deferred.promise;
-}
-
-
-//向队列添加运行单元
-queue1.push(testfun, [1]) //添加运行项
-// queue1.go(testfun, [2]) //添加并自动启动队列
-// queue1.go(testfun, [3], { Queue_event: 0 }) //添加不会触发队列 回调的运行项.
-// queue1.go(testfun, [4]).then(
-//     function (data) { console.log('done-succ:', data) },
-//     function (err) { console.log('done-err:', err) }
-// )
-
-// queue1.go(testfun, [5], {
-//     event_succ: function (data) { console.log('conf-succ:', data) },
-//     event_err: function (err) { console.log('conf-err:', err) }
-// })
-
-}
-
-
-function reader_timer() {
-    const timer_sticker = process.env.TIMER_TICKER || '* * * * * *';
-
-    schedule.scheduleJob(timer_sticker, async () => {
-        let provider = new OracleProvider(service_id, update_cycle, duration, update_start_time);
-        let start_time = new Date();
+let oBridgeActionReader = new BridgeActionReader();
 
 
 
 
-    });
-
-}
-
+oBridgeActionReader.reader_timer();
 
 
