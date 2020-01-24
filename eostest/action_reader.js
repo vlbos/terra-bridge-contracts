@@ -31,7 +31,7 @@ class BridgeActionReader {
     global_action_seq = 0;
     ibactions = [];
     rbactions = [];
-    read_action() {
+    read_action=function() {
         // eosapi.getBlock(1, (error, result) => {console.log(error, result)});
         // let ret = eosapi.getInfo((error, result) => { console.log(error, result) });//history_get_actions('burn.bos');
         // console.log(eosapi);
@@ -99,7 +99,7 @@ class BridgeActionReader {
     }
 
 
-    reader_timer() {
+    reader_timer=function() {
         const timer_sticker = process.env.TIMER_TICKER || '* * * * * *';
 
         schedule.scheduleJob(timer_sticker, async () => {
@@ -114,7 +114,7 @@ class BridgeActionReader {
 
 
 
-    testfs() {
+    testfs=function() {
 
         fs.readFile("./data/hello.txt", function (error, data) {
             if (error) {
@@ -136,7 +136,7 @@ class BridgeActionReader {
     finalityQueue;
     unfinalityQueue;
 
-    testqueue() {
+    testqueue=function() {
 
         //初始化Promise异步队列类
         let Queue = queuefun.Queue();
@@ -193,4 +193,5 @@ class BridgeActionReader {
 
 // oBridgeActionReader.reader_timer();
 
-module.exports = exports = new BridgeActionReader();
+// module.exports = exports = new BridgeActionReader();
+exports = module.exports = BridgeActionReader;
