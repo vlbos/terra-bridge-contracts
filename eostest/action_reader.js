@@ -39,7 +39,7 @@ class BridgeActionReader {
             console.log("====", error, result);
 
             lib = 0;
-            for (let a: result.actions) {
+            for (let a  of  result.actions) {
                 if (a.global_action_seq <= global_action_seq) {
                     return true;
                 }
@@ -65,7 +65,7 @@ class BridgeActionReader {
 
 
 
-            for (let a: rbactions) {
+            for (let a of  rbactions) {
              
                 if (a.block_num <= lib) {
                     ibactions.push(act);
@@ -186,11 +186,11 @@ class BridgeActionReader {
 
 }
 
-let oBridgeActionReader = new BridgeActionReader();
+// let oBridgeActionReader = new BridgeActionReader();
 
 
 
 
-oBridgeActionReader.reader_timer();
+// oBridgeActionReader.reader_timer();
 
-
+module.exports = exports = new BridgeActionReader();
