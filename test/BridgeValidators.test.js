@@ -126,8 +126,9 @@ contract('BridgeValidators', async (accounts) => {
     let proxyOwner = accounts[3]
 
     beforeEach(async () => {
+      const initializeData = Buffer.from('');
       bridgeValidatorsContract = await BridgeValidators.new({ from: owner });
-      proxy = await UpgradeableProxy.new(bridgeValidatorsContract.address, { from: proxyOwner })
+      proxy = await UpgradeableProxy.new(bridgeValidatorsContract.address,proxyOwner.address,initializeData,{ from: proxyOwner })
       originalContract = await BridgeValidators.at(proxy.address)
       await originalContract.initialize(required_signatures, validators, owner, {from: owner}).should.be.fulfilled;
     })

@@ -14,6 +14,23 @@ contract HomeToken is IBurnableMintableToken, ERC827Token, DetailedERC20, Burnab
   {
 
   }
+//   /**
+//   * @dev transfer token to a contract address with additional data if the recipient is a contact.
+//   * @param _to The address to transfer to.
+//   * @param _value The amount to be transferred.
+//   * @param _data The extra data to be passed to the receiving contract.
+//   */
+//   function transferAndCall(address _to, uint _value, bytes _data)
+//     public
+//     returns (bool success)
+//   {
+//     super.transfer(_to, _value);
+//     Transfer(msg.sender, _to, _value, _data);
+//     if (isContract(_to)) {
+//       contractFallback(_to, _value, _data);
+//     }
+//     return true;
+//   }
 
   function finishMinting() public returns (bool) {
     revert();
