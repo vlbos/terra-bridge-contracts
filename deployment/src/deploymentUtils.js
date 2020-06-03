@@ -28,7 +28,7 @@ async function deployContract(contractJson, args, {from, network, nonce}) {
   };
   let instance = new web3.eth.Contract(contractJson.abi, options);
   const result = await instance.deploy({
-    data: contractJson.bytecode,
+    data: "0x"+contractJson.bytecode,
     arguments: args
   }).encodeABI()
   const tx = await sendRawTx({

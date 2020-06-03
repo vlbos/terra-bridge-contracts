@@ -1,5 +1,5 @@
 {
-  "name": "Terra-Bridge-Contracts",
+  "name": "terra-bridge-contracts",
   "version": "1.0.0",
   "description": "A erc-20 to erc20, ether to erc20 and erc20 to ether bridge between EVM based chains",
   "directories": {
@@ -24,12 +24,20 @@
     "chai-bignumber": "^2.0.2",
     "openzeppelin-solidity": "1.12.0",
     "truffle": "^4.1.13",
-    "web3-utils": "^1.0.0-beta.34",
-    "zos-lib": "1.4.0"
+    "web3-utils": "^1.0.0-beta.34"
   },
   "devDependencies": {
     "ganache-cli": "^6.1.6",
     "truffle-flattener": "^1.2.3",
     "solidity-coverage": "^0.5.11"
-  }
+  },
+  "main": ".solcover.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vlbos/terra-bridge-contracts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vlbos/terra-bridge-contracts/issues"
+  },
+  "homepage": "https://github.com/vlbos/terra-bridge-contracts#readme"
 }

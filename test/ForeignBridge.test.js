@@ -475,7 +475,7 @@ contract('ForeignBridge', async (accounts) => {
       // Create v1 of bridge using bridge
       const foreignBridge =  await ForeignBridge.new();
       const proxyOwner = accounts[1]
-      const proxy = await UpgradeableProxy.new(foreignBridge.address,proxyOwner,initializeData, { from: proxyOwner })
+      const proxy = await UpgradeableProxy.new(proxyOwner.address, foreignBridge.address,{ from: proxyOwner })
       const originalContract = await ForeignBridge.at(proxy.address)
       await originalContract.initialize(fakeValidatorsAddress, FOREIGN_DAILY_LIMIT, FOREIGN_MAX_AMOUNT_PER_TX, FOREIGN_MIN_AMOUNT_PER_TX, gasPrice, requireBlockConfirmations).should.be.fulfilled
 

@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import "../upgradeability/AdminUpgradeabilityProxy.sol";
+import "../installed/AdminUpgradeabilityProxy.sol";
 
 contract TestProxy {
   constructor () public {}

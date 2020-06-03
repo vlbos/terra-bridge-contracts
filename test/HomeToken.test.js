@@ -95,11 +95,11 @@ contract('HomeToken', async (accounts) => {
 
   describe('#approve', () => {
     it('can approve and call', async () => {
-      const testMock = await approveTest.new();
+      const testMock = await approveAndCallTest.new();
       (await testMock.from()).should.be.equal('0x0000000000000000000000000000000000000000');
       (await testMock.value()).should.be.bignumber.equal('0');
 
-      var testMockWeb3 = web3.eth.contract(approveTest.abi);
+      var testMockWeb3 = web3.eth.contract(approveAndCallTest.abi);
       var testMockInstance = testMockWeb3.at(testMock.address);
       var callDoSomething123 = testMockInstance.doSomething.getData(token.address, user, 1);
 

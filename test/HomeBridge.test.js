@@ -51,7 +51,7 @@ contract('HomeBridge', async (accounts) => {
       // Create v1 of bridge using bridge
       const initializeData = Buffer.from('');
       const proxyOwner = accounts[1]
-      const proxy = await UpgradeableProxy.new(homeContract.address,proxyOwner.address,initializeData, { from: proxyOwner })
+      const proxy = await UpgradeableProxy.new(proxyOwner.address, homeContract.address,{ from: proxyOwner })
       const originalContract = await HomeBridge.at(proxy.address)
       await originalContract.initialize(validatorContract.address, "3", "2", "1", gasPrice, requireBlockConfirmations).should.be.fulfilled
       // Upgrade to v2
@@ -144,7 +144,7 @@ contract('HomeBridge', async (accounts) => {
 
       await homeToken.mint(user, overMaxPerTx, {from: owner }).should.be.fulfilled
       await homeBridge.registerToken(foreignTokenAddress, homeToken.address).should.be.fulfilled
-      await homeToken.transfer(homeBridge.address, overMaxPerTx, tokenTransferCall, {from: user}).should.be.rejectedWith(ERROR_MSG)
+      await homeToken.transferAndCall(homeBridge.address, overMaxPerTx, tokenTransferCall, {from: user}).should.be.rejectedWith(ERROR_MSG)
     })
 
     it('should not allow transfer under minPerTx', async() => {
